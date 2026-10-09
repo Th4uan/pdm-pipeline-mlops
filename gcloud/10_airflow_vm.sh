@@ -104,10 +104,16 @@ bash "${GCLOUD_DIR}/20_sync_dags.sh"
 info "4/5 VM ${VM_NAME}"
 if vm_existe; then
   ok "VM ja existe."
-  if [[ "${REINICIAR}" == "true" ]]; then
+  # O startup script fica gravado nos metadados: atualiza para a versao do repositorio.
+  gcloud compute instances add-metadata "${VM_NAME}" --zone="${ZONE}" --project="${PROJECT_ID}" \
+    --metadata-from-file=startup-script="${GCLOUD_DIR}/startup-script.sh" >/dev/null
+  ok "Startup script da VM atualizado."
+  ESTADO_ANTERIOR="$(status_vm)"
+  if [[ "${REINICIAR}" == "true" || "${ESTADO_ANTERIOR}" == erro:* ]]; then
+    [[ "${ESTADO_ANTERIOR}" == erro:* ]] && warn "Instalacao anterior parou em '${ESTADO_ANTERIOR}': reiniciando a VM para tentar de novo."
     gcloud compute instances reset "${VM_NAME}" --zone="${ZONE}" --project="${PROJECT_ID}" --quiet
-    ok "VM reiniciada: o startup script reaplica o codigo do bucket."
-    sleep 20
+    ok "VM reiniciada: o startup script roda de novo e reaplica o codigo do bucket."
+    REINICIADA=true
   fi
 else
   gcloud compute instances create "${VM_NAME}" \
@@ -125,7 +131,8 @@ fi
 
 # ---------------------------------------------------------------------------
 info "5/5 Aguardando o Airflow (ate ${ESPERA_MAX_MIN} min; pode fechar e rodar de novo)"
-FIM=$(( $(date +%s) + ESPERA_MAX_MIN * 60 ))
+INICIO=$(date +%s)
+FIM=$(( INICIO + ESPERA_MAX_MIN * 60 ))
 ULTIMO=""
 while (( $(date +%s) < FIM )); do
   ATUAL="$(status_vm)"
@@ -139,6 +146,11 @@ while (( $(date +%s) < FIM )); do
       info "Proximo passo: bash gcloud/30_abrir_ui.sh  (e Web Preview > porta ${UI_PORT})"
       exit 0 ;;
     erro:*)
+      # Logo apos o reset, o status ainda e' o erro antigo ate o startup script recomecar.
+      if [[ "${REINICIADA:-false}" == "true" && "${ATUAL}" == "${ESTADO_ANTERIOR}" ]] \
+         && (( $(date +%s) - INICIO < 240 )); then
+        sleep 15; continue
+      fi
       erro "A instalacao falhou na fase '${ATUAL#erro:}'. Diagnostico: bash gcloud/40_status.sh" ;;
   esac
   sleep 15

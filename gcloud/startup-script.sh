@@ -65,6 +65,8 @@ AIRFLOW_VAR_PROJETO=${PROJETO}
 AIRFLOW_VAR_REGIAO=${REGIAO}
 AIRFLOW_VAR_BUCKET=${BUCKET}
 AIRFLOW_VAR_GOLD_TABLE=${GOLD_TABLE}
+# Airflow 3 nao cria conexoes padrao: a dos operadores Google usa as credenciais da VM (ADC).
+AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT={"conn_type": "google_cloud_platform", "extra": {"project": "${PROJETO}"}}
 $(cat "${SRC}/.env.gerado")
 EOF
 
@@ -110,7 +112,8 @@ fi
 
 # ---------------------------------------------------------------------------
 FASE="iniciando-airflow"; status "${FASE}"
-docker compose up -d --no-build --pull never
+# --pull missing: baixa o postgres na primeira vez; a imagem do Airflow ja existe localmente.
+docker compose up -d --no-build --pull missing
 
 for _ in $(seq 1 60); do
   if curl -sf "http://localhost:8080/api/v2/version" >/dev/null; then
