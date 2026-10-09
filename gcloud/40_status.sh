@@ -14,7 +14,7 @@ exige_projeto
 info "VM ${VM_NAME}"
 if vm_existe; then
   gcloud compute instances describe "${VM_NAME}" --zone="${ZONE}" --project="${PROJECT_ID}" \
-    --format='value(status,machineType.basename())' | sed 's/^/  estado/maquina: /'
+    --format='value(status,machineType.basename())' | sed 's|^|  estado e maquina: |'
   printf '  instalacao: %s\n' "$(status_vm)"
   info "Ultimas linhas do log de instalacao (porta serial)"
   gcloud compute instances get-serial-port-output "${VM_NAME}" --zone="${ZONE}" --project="${PROJECT_ID}" 2>/dev/null \
