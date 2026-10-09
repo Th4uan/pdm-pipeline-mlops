@@ -86,3 +86,25 @@ status_vm() {
     --zone="${ZONE}" --project="${PROJECT_ID}" \
     --query-path=airflow/status --format='value(value)' 2>/dev/null || true
 }
+
+# Qual versao da DAG esta no bucket: GABARITO (completa) ou ALUNO (com TODOs pendentes).
+versao_dags_bucket() {
+  local dag sql
+  dag="$(gcloud storage cat "gs://${BUCKET}/airflow/dags/pipeline_preco_imoveis.py" 2>/dev/null || true)"
+  sql="$(gcloud storage cat "gs://${BUCKET}/airflow/dags/sql/preparar_dataset.sql" 2>/dev/null || true)"
+  if [[ -z "${dag}" ]]; then
+    echo "nenhuma"
+  elif grep -q "(GABARITO)" <<<"${dag}"; then
+    echo "GABARITO (fluxo completo)"
+  else
+    local pendentes=()
+    grep -q "TODO 1" <<<"${sql}" && pendentes+=("1")
+    grep -q "# TODO 2" <<<"${dag}" && pendentes+=("2")
+    grep -q "# TODO 3" <<<"${dag}" && pendentes+=("3")
+    if (( ${#pendentes[@]} )); then
+      echo "ALUNO (TODOs pendentes: ${pendentes[*]})"
+    else
+      echo "ALUNO (TODOs concluidos)"
+    fi
+  fi
+}

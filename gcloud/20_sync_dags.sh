@@ -48,3 +48,5 @@ gcloud storage rsync --recursive --delete-unmatched-destination-objects \
 gcloud storage ls --recursive "gs://${BUCKET}/airflow/dags/**" 2>/dev/null \
   | sed "s#gs://${BUCKET}/airflow/dags/#  - #"
 ok "Enviado. A DAG aparece na UI em ate ~1 min (sincronizacao + leitura do Airflow)."
+info "Versao no Airflow: $(versao_dags_bucket)"
+[[ "${GABARITO}" == "true" ]] || printf '  Para a versao completa de demonstracao: GABARITO=true bash gcloud/20_sync_dags.sh\n'

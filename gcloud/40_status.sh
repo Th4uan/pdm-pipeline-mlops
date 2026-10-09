@@ -23,7 +23,7 @@ else
   skip "VM nao existe."
 fi
 
-info "DAGs no bucket"
+info "DAGs no bucket — versao: $(versao_dags_bucket)"
 gcloud storage ls --recursive "gs://${BUCKET}/airflow/dags/**" 2>/dev/null \
   | sed "s#gs://${BUCKET}/airflow/dags/#  - #" || skip "Nenhuma DAG enviada."
 
