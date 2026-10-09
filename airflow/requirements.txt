@@ -1,0 +1,5 @@
+# Somente o que a imagem oficial do Airflow nao traz.
+# scikit-learn PRECISA casar com o container de serving sklearn-cpu.1-6:
+# treinar numa versao e servir em outra quebra o unpickle no endpoint.
+scikit-learn==1.6.1
+db-dtypes
