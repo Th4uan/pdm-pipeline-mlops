@@ -108,7 +108,9 @@ def pipeline_preco_imoveis():
         df = (
             bigquery.Client(project=cfg.PROJETO)
             .query(f"SELECT {colunas} FROM `{execucao['tabela']}`")
-            .to_dataframe()
+            # API REST comum: a Storage Read API exigiria o papel bigquery.readSessionUser
+            # e nao compensa para uma tabela deste tamanho
+            .to_dataframe(create_bqstorage_client=False)
         )
 
         def separar(nome):

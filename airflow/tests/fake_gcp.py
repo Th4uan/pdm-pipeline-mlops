@@ -88,7 +88,10 @@ class _Job:
     def __init__(self, df):
         self._df = df
 
-    def to_dataframe(self):
+    def to_dataframe(self, create_bqstorage_client=True, **_):
+        # como na VM: a SA nao tem bigquery.readSessionUser, so a API REST funciona
+        if create_bqstorage_client is not False:
+            raise PermissionError("403 bigquery.readsessions.create (use create_bqstorage_client=False)")
         return self._df
 
     def result(self):

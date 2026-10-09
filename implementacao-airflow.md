@@ -112,7 +112,7 @@ Convenções comuns: `set -euo pipefail`; todos fazem `source "$(dirname "$0")/c
 
 ### 4.3 `10_airflow_vm.sh` — rede, identidade e VM (~1 min no Cloud Shell)
 
-1. **Service account** `airflow-mlops` e papéis: `bigquery.dataEditor` e `bigquery.jobUser`, `storage.objectAdmin`, `aiplatform.user`, `logging.logWriter`. (Os papéis de BigQuery e Storage podem ser restringidos ao dataset e ao bucket como refinamento.)
+1. **Service account** `airflow-mlops` e papéis: `bigquery.dataEditor` e `bigquery.jobUser`, `bigquery.readSessionUser`, `storage.objectAdmin`, `aiplatform.user`, `logging.logWriter`. (Os papéis de BigQuery e Storage podem ser restringidos ao dataset e ao bucket como refinamento.)
 2. **Firewall** `allow-iap-airflow`: entrada TCP 22 e 8080 apenas de `35.235.240.0/20` (faixa do IAP), na tag `airflow-mlops`.
 3. Se `USAR_NAT=true`: Cloud Router `airflow-router` + NAT `airflow-nat` em `us-central1`.
 4. **Envia o código-fonte** da pasta `airflow/` (Dockerfile, compose, requirements) para `gs://${BUCKET}/airflow/src/` e as DAGs para `gs://${BUCKET}/airflow/dags/`.

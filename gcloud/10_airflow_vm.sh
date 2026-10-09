@@ -35,7 +35,7 @@ else
 fi
 
 # Papeis no projeto (Vertex AI, jobs do BigQuery, logs).
-for ROLE in roles/aiplatform.user roles/bigquery.jobUser roles/logging.logWriter; do
+for ROLE in roles/aiplatform.user roles/bigquery.jobUser roles/bigquery.readSessionUser roles/logging.logWriter; do
   gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
     --member="serviceAccount:${SA_EMAIL}" --role="${ROLE}" \
     --condition=None --quiet >/dev/null
